@@ -1,6 +1,7 @@
 package com.elearning.security;
 
 
+import com.elearning.model.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -28,33 +29,38 @@ public class JwtService {
         this.refreshTokenExpirationMs = refreshTokenExpirationMs;
     }
 
-    public String generateAccessToken(String email) {
-        return buildToken(email, accessTokenExpirationMs);
-    }
+    public String generateAccessToken(String email, Role role) {
+        Date now =  new Date();
 
-    public String generateRefreshToken(String email) {
-        return buildToken(email, refreshTokenExpirationMs);
-    }
-    private String buildToken(String subject, long expirationMs) {
-        Date now = new Date();
         return Jwts.builder()
-                .subject(subject)                  // "chủ" của token — ở đây là email user
+                .subject(email)
+                .claim("role", role.name())
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + expirationMs))
-                .signWith(key)                       // ký bằng secret — không biết secret thì không giả mạo được
+                .expiration(new Date(now.getTime() + accessTokenExpirationMs) )
+                .signWith(key)
                 .compact();
     }
 
-    // Trả về email nếu token hợp lệ (đúng chữ ký, chưa hết hạn).
-    // Ném JwtException (ExpiredJwtException, SignatureException...) nếu không —
-    // để nguyên, không nuốt lỗi, vì JwtAuthFilter cần biết CÓ lỗi để xử lý đúng.
-    public String extractEmail(String token) {
-        Claims claims = Jwts.parser()
+    public String generateRefreshToken(String email) {
+        Date now = new Date();
+        return Jwts.builder()
+                .subject(email)
+                .issuedAt(now)
+                .expiration(new Date(now.getTime() + refreshTokenExpirationMs) )
+                .signWith(key)
+                .compact();
+    }
+
+    public Claims extractClaims(String token) {
+        return Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return claims.getSubject();
+    }
+
+    public String extractEmail(String token) {
+      return extractClaims(token).getSubject();
     }
 
 }
