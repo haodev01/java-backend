@@ -14,6 +14,7 @@ public class User
     public User( String email, String password) {
         this.email = email;
         this.password = password;
+        this.role = Role.STUDENT;
     }
 
     @Id
@@ -28,8 +29,14 @@ public class User
     private String password;
 
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private Instant createdAt;
+
 
     public Long getId() {
         return id;
@@ -55,6 +62,14 @@ public class User
         this.password = password;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -62,4 +77,7 @@ public class User
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
+
+
+
 }

@@ -43,4 +43,9 @@ public class UserService {
         }
         throw new BadCredentialsException("Sai email hoặc mật khẩu");
     }
+
+    public User getByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadCredentialsException("User không tồn tại"));
+    }
 }

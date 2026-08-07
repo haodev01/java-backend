@@ -12,6 +12,7 @@ import com.elearning.service.UserService;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,7 @@ public class AuthController {
         try {
             User user = userService.login(request.email(), request.password());
 
-            String accessToken = jwtService.generateAccessToken(user.getEmail());
+            String accessToken = jwtService.generateAccessToken(user.getEmail(), user.getRole());
             String refreshToken = jwtService.generateRefreshToken(user.getEmail());
 
             refreshTokenStore.save(user.getEmail(), refreshToken);
@@ -68,8 +69,9 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body("Refresh token không hợp lệ hoặc đã bị thu hồi");
             }
+            User user = userService.getByEmail(email);
 
-            String newAccessToken = jwtService.generateAccessToken(email);
+            String newAccessToken = jwtService.generateAccessToken(email, user.getRole());
             // Không rotate refresh token ở lesson này (giữ nguyên, trả lại y hệt) —
             // rotation (cấp refresh token mới mỗi lần refresh) là cải tiến bảo mật
             // thật nhưng nằm ngoài phạm vi lesson này để tránh dồn quá nhiều khái niệm.
@@ -85,6 +87,12 @@ public class AuthController {
         // /logout KHÔNG nằm trong permitAll nên bắt buộc phải có access token hợp lệ.
         refreshTokenStore.revoke(authentication.getName());
         return ResponseEntity.ok("Đã đăng xuất");
+    }
+
+    @GetMapping("admin-only")
+    @PreAuthorize("hasRole('ADMIN')")
+    public  ResponseEntity<String> adminOnly() {
+        return ResponseEntity.ok("ADMIN it me");
     }
 
 }
