@@ -38,17 +38,11 @@ public class AuthController {
 
     @PostMapping("login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            User user = userService.login(request.email(), request.password());
-
-            String accessToken = jwtService.generateAccessToken(user.getEmail(), user.getRole());
-            String refreshToken = jwtService.generateRefreshToken(user.getEmail());
-
-            refreshTokenStore.save(user.getEmail(), refreshToken);
-            return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        }
+        User user = userService.login(request.email(), request.password());
+        String accessToken = jwtService.generateAccessToken(user.getEmail(), user.getRole());
+        String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+        refreshTokenStore.save(user.getEmail(), refreshToken);
+        return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
     }
 
     @GetMapping("me")
@@ -59,27 +53,15 @@ public class AuthController {
 
     @PostMapping("refresh")
     public ResponseEntity<?> refresh(@RequestBody RefreshRequest request) {
-        try {
-            String email = jwtService.extractEmail(request.refreshToken());
-
-            // Không chỉ kiểm tra chữ ký/hạn dùng (extractEmail đã làm việc đó) —
-            // còn phải kiểm tra token này CÒN ĐƯỢC PHÉP DÙNG hay đã bị revoke.
-            // Đây chính là điều JWT thuần túy ở Lesson 0004 không làm được.
-            if (!refreshTokenStore.isValid(email, request.refreshToken())) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Refresh token không hợp lệ hoặc đã bị thu hồi");
-            }
-            User user = userService.getByEmail(email);
-
-            String newAccessToken = jwtService.generateAccessToken(email, user.getRole());
-            // Không rotate refresh token ở lesson này (giữ nguyên, trả lại y hệt) —
-            // rotation (cấp refresh token mới mỗi lần refresh) là cải tiến bảo mật
-            // thật nhưng nằm ngoài phạm vi lesson này để tránh dồn quá nhiều khái niệm.
-            return ResponseEntity.ok(new AuthResponse(newAccessToken, request.refreshToken()));
-        } catch (JwtException e) {
+        String email = jwtService.extractEmail(request.refreshToken());
+        if (!refreshTokenStore.isValid(email, request.refreshToken())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Refresh token không hợp lệ hoặc đã hết hạn");
+                    .body("Refresh token không hợp lệ hoặc đã bị thu hồi");
         }
+        User user = userService.getByEmail(email);
+        String newAccessToken = jwtService.generateAccessToken(email, user.getRole());
+
+        return ResponseEntity.ok(new AuthResponse(newAccessToken, request.refreshToken()));
     }
     @PostMapping("logout")
     public ResponseEntity<?> logout(Authentication authentication) {
