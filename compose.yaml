@@ -1,0 +1,16 @@
+services:
+  mysql:
+    image: mysql:8.1
+    container_name: elearning-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: elearning
+      MYSQL_USER: elearning
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3306:3306"
+  redis:
+    image: redis:7
+    container_name: elearning-redis
+    ports:
+      - "6379:6379"
