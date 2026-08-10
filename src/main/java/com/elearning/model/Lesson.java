@@ -24,6 +24,9 @@ public class Lesson {
     @JoinColumn(name = "chapter_id", nullable = false)
     private Chapter chapter;
 
+    @Column(name = "content_url")
+    private String contentUrl;
+
     protected Lesson() {}
 
     public Lesson(String title, int order, String contentType) {
@@ -38,4 +41,7 @@ public class Lesson {
     public String getTitle() { return title; }
     public int getOrder() { return order; }
     public String getContentType() { return contentType; }
+
+    public void attachContentUrl(String url) { this.contentUrl = url; }
+    public String getContentUrl() { return contentUrl; }
 }

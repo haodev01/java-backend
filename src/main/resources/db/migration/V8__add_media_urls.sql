@@ -1,0 +1,2 @@
+ALTER TABLE courses ADD COLUMN thumbnail_url VARCHAR(500) NULL;
+ALTER TABLE lessons ADD COLUMN content_url VARCHAR(500) NULL;

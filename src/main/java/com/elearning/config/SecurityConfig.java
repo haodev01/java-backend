@@ -40,7 +40,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/forgot-password",   // mới — chưa đăng nhập được nên PHẢI public
                                 "/api/v1/auth/reset-password"      // mới — lý do tương tự
                         ).permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/courses/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET,
+                                "/api/v1/courses/**", "/uploads/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

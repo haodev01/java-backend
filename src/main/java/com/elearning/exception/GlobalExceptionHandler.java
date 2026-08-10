@@ -71,6 +71,10 @@ public class GlobalExceptionHandler {
         log.warn("Vi phạm ràng buộc dữ liệu: {}", e.getMostSpecificCause().getMessage());
         return build(HttpStatus.CONFLICT, "Dữ liệu bị trùng hoặc vi phạm ràng buộc, vui lòng kiểm tra lại");
     }
+    @ExceptionHandler(InvalidFileException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidFile(InvalidFileException e) {
+        return build(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
 
 
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String message) {

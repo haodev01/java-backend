@@ -37,8 +37,14 @@ public class Chapter {
         lesson.setChapter(this);
     }
 
-    // package-private — CHỦ Ý không có getCourse() công khai, xem callout dưới
     void setCourse(Course course) { this.course = course; }
+
+    // @JsonIgnore: dùng được trong Java code (vd kiểm tra ownership ở
+    // CourseService) nhưng KHÔNG serialize ra JSON — nếu không, Course có
+    // getChapters() + Chapter có getCourse() sẽ lặp vô hạn Course->Chapter->Course
+    // khi trả response, crash StackOverflowError.
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public Course getCourse() { return course; }
 
     public Long getId() { return id; }
     public String getTitle() { return title; }

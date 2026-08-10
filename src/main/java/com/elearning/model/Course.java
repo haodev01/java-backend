@@ -18,6 +18,9 @@ public class Course {
     @Column(nullable = false, unique = true)
     private String slug;
 
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl;
+
     @Column(nullable = false)
     private BigDecimal price;
 
@@ -58,5 +61,8 @@ public class Course {
     public User getInstructor() { return instructor; }
     public CourseStatus getStatus() { return status; }
     public List<Chapter> getChapters() { return chapters; }
+
+    public void attachThumbnail(String url) { this.thumbnailUrl = url; }
+    public String getThumbnailUrl() { return thumbnailUrl; }
 
 }

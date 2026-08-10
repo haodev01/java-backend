@@ -1,17 +1,17 @@
 package com.elearning.controller;
 
-import com.elearning.dto.ApiResponse;
-import com.elearning.dto.CourseSummary;
-import com.elearning.dto.CreateCourseRequest;
-import com.elearning.dto.PageResponse;
+import com.elearning.dto.*;
+import com.elearning.model.Chapter;
 import com.elearning.model.Course;
 import com.elearning.service.CourseService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -46,5 +46,31 @@ public class CourseController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Course>> detail(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success("OK", courseService.getCourse(id)));
+    }
+    @PostMapping("/{courseId}/chapters")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Course>> addChapter(Authentication authentication,
+                                                          @PathVariable Long courseId, @RequestBody CreateChapterRequest request) {
+        Course course = courseService.addChapter(authentication.getName(), courseId, request);
+        return ResponseEntity.ok(ApiResponse.success("Thêm chương thành công", course));
+    }
+
+    @PostMapping(value = "/{courseId}/thumbnail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Course>> uploadThumbnail(Authentication authentication,
+                                                               @PathVariable Long courseId, @RequestParam("file") MultipartFile file) {
+        Course course = courseService.uploadThumbnail(authentication.getName(), courseId, file);
+        return ResponseEntity.ok(ApiResponse.success("Tải thumbnail thành công", course));
+    }
+
+    @PostMapping(value = "/{courseId}/chapters/{chapterId}/lessons/{lessonId}/video",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Chapter>> uploadLessonVideo(Authentication authentication,
+                                                                  @PathVariable Long courseId, @PathVariable Long chapterId, @PathVariable Long lessonId,
+                                                                  @RequestParam("file") MultipartFile file) {
+        Chapter chapter = courseService.uploadLessonVideo(
+                authentication.getName(), courseId, chapterId, lessonId, file);
+        return ResponseEntity.ok(ApiResponse.success("Tải video thành công", chapter));
     }
 }
