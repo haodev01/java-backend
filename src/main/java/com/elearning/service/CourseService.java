@@ -1,16 +1,14 @@
 package com.elearning.service;
 
 
-import com.elearning.dto.CourseSummary;
-import com.elearning.dto.CreateChapterRequest;
-import com.elearning.dto.CreateCourseRequest;
-import com.elearning.dto.CreateLessonRequest;
+import com.elearning.dto.*;
 import com.elearning.exception.NotFoundException;
 import com.elearning.model.Chapter;
 import com.elearning.model.Course;
 import com.elearning.model.Lesson;
 import com.elearning.model.User;
 import com.elearning.repository.CourseRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,8 +48,8 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
-    public List<CourseSummary> listCourses() {
-        return courseRepository.findAllSummaries();
+    public PageResponse<CourseSummary> listCourses(String title, String slug, Pageable pageable) {
+        return PageResponse.from(courseRepository.findAllSummaries(title, slug, pageable));
     }
 
     public Course getCourse(Long id) {
