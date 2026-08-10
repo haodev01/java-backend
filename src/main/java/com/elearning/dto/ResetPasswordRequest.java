@@ -1,4 +1,3 @@
 package com.elearning.dto;
 
-public class ResetPasswordRequest {
-}
+public record ResetPasswordRequest(String token, String newPassword) {}

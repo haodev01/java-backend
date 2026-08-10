@@ -1,3 +1,7 @@
 package com.elearning.dto;
 
-public record AuthResponse(String accessToken, String refreshToken){}
+import com.elearning.model.User;
+
+import java.util.Optional;
+
+public record AuthResponse(String accessToken, String refreshToken, User user){}
