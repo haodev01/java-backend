@@ -33,7 +33,7 @@ public class Course {
     // (mục 1) — lưu/xoá Course tự lưu/xoá theo mọi Chapter của nó.
     // FetchType.EAGER: CỐ Ý — đơn giản để chạy được ngay. Đây chính là nguyên
     // nhân sẽ gây N+1, chưa sửa ở lesson này — Lesson 0013 sẽ đo và sửa.
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Chapter> chapters = new ArrayList<>();
 
     protected Course() {}

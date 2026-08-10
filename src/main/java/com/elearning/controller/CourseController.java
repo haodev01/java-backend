@@ -1,6 +1,7 @@
 package com.elearning.controller;
 
 import com.elearning.dto.ApiResponse;
+import com.elearning.dto.CourseSummary;
 import com.elearning.dto.CreateCourseRequest;
 import com.elearning.model.Course;
 import com.elearning.service.CourseService;
@@ -32,7 +33,7 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Course>>> list() {
+    public ResponseEntity<ApiResponse<List<CourseSummary>>> list() {
         return ResponseEntity.ok(ApiResponse.success("OK", courseService.listCourses()));
     }
 

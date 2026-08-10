@@ -1,6 +1,7 @@
 package com.elearning.service;
 
 
+import com.elearning.dto.CourseSummary;
 import com.elearning.dto.CreateChapterRequest;
 import com.elearning.dto.CreateCourseRequest;
 import com.elearning.dto.CreateLessonRequest;
@@ -49,8 +50,8 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
-    public List<Course> listCourses() {
-        return courseRepository.findAll();
+    public List<CourseSummary> listCourses() {
+        return courseRepository.findAllSummaries();
     }
 
     public Course getCourse(Long id) {
