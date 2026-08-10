@@ -51,7 +51,7 @@ public class CourseService {
 
         User instructor = userService.getByEmail(instructorEmail);
 
-        Course course = new Course(request.title(), request.slug(), request.price(), instructor);
+        Course course = new Course(request.title(), request.slug(), request.price(), instructor, request.description());
 
         for (CreateChapterRequest chapterReq : request.chapters()) {
             Chapter chapter = new Chapter(chapterReq.title(), chapterReq.order());

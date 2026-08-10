@@ -25,7 +25,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     // field lọc; đáng chuyển sang Specification nếu sau này filter tăng lên
     // nhiều field kết hợp AND/OR linh hoạt (chưa cần ở quy mô hiện tại — YAGNI).
     @Query(value = "SELECT new com.elearning.dto.CourseSummary(" +
-            "c.id, c.title, c.slug, c.price, c.instructor.email, SIZE(c.chapters)) " +
+            "c.id, c.title, c.slug, c.price, c.description, c.instructor.email, SIZE(c.chapters)) " +
             "FROM Course c " +
             "WHERE (:title IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
             "AND (:slug IS NULL OR c.slug = :slug)",

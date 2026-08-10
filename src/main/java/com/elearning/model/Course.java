@@ -21,6 +21,12 @@ public class Course {
     @Column(name = "thumbnail_url")
     private String thumbnailUrl;
 
+    // columnDefinition = "TEXT" khớp đúng kiểu cột trong V7 migration — String
+    // mặc định map sang VARCHAR(255), không set rõ sẽ lệch với DB và vỡ khi
+    // ddl-auto=validate (giống bài học từ RequestLog ở Lesson trước).
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Column(nullable = false)
     private BigDecimal price;
 
@@ -41,12 +47,13 @@ public class Course {
 
     protected Course() {}
 
-    public Course(String title, String slug, BigDecimal price, User instructor) {
+    public Course(String title, String slug, BigDecimal price, User instructor, String description) {
         this.title = title;
         this.slug = slug;
         this.price = price;
         this.instructor = instructor;
         this.status = CourseStatus.DRAFT;
+        this.description = description;
     }
 
     public void addChapter(Chapter chapter) {
@@ -61,6 +68,7 @@ public class Course {
     public User getInstructor() { return instructor; }
     public CourseStatus getStatus() { return status; }
     public List<Chapter> getChapters() { return chapters; }
+    public String getDescription() { return description; }
 
     public void attachThumbnail(String url) { this.thumbnailUrl = url; }
     public String getThumbnailUrl() { return thumbnailUrl; }
