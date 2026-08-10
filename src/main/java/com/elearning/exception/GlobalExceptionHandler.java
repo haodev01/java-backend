@@ -1,4 +1,4 @@
-package com.elearning.model;
+package com.elearning.exception;
 
 import com.elearning.dto.ErrorResponse;
 import io.jsonwebtoken.JwtException;
