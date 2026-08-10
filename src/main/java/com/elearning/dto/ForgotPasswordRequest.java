@@ -1,4 +1,3 @@
 package com.elearning.dto;
 
-public class ForgotPasswordRequest {
-}
+public record ForgotPasswordRequest(String email) {}

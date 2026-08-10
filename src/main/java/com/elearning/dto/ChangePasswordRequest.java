@@ -1,4 +1,3 @@
 package com.elearning.dto;
 
-public class ChangePasswordRequest {
-}
+public record ChangePasswordRequest(String oldPassword, String newPassword) {}
