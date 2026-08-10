@@ -16,8 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 @Service
 public class CourseService {
@@ -38,6 +38,7 @@ public class CourseService {
         this.fileStorageService = fileStorageService;
     }
 
+    @CacheEvict(value = "courseList", allEntries = true)
     public Course createCourse(String instructorEmail, CreateCourseRequest request) {
         // Check chủ động trước — cùng nguyên tắc email ở UserService.register()
         // (Lesson 0001): fail nhanh với message rõ ràng, thay vì để tới tận DB
@@ -61,16 +62,16 @@ public class CourseService {
         }
         return courseRepository.save(course);
     }
-
+    @Cacheable("courseList")
     public PageResponse<CourseSummary> listCourses(String title, String slug, Pageable pageable) {
         return PageResponse.from(courseRepository.findAllSummaries(title, slug, pageable));
     }
-
+    @CacheEvict(value = "courseList", allEntries = true)
     public Course getCourse(Long id) {
         return courseRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy khoá học id=" + id));
     }
-
+    @CacheEvict(value = "courseList", allEntries = true)
     public Course addChapter(String requesterEmail, Long courseId, CreateChapterRequest request) {
         Course course = getCourse(courseId);
         ensureOwnerOrAdmin(requesterEmail, course);
@@ -83,6 +84,7 @@ public class CourseService {
         return courseRepository.save(course); // save Course — cascade tự INSERT đúng 1 chapter mới, không đụng chapter cũ
     }
 
+    @CacheEvict(value = "courseList", allEntries = true)
     public Chapter addLesson(String requesterEmail, Long courseId, Long chapterId, CreateLessonRequest request) {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy chương id=" + chapterId));

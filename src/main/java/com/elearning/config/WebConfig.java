@@ -13,7 +13,7 @@ public class WebConfig  implements WebMvcConfigurer {
     public PageableHandlerMethodArgumentResolverCustomizer pageableCustomizer() {
         // Client gửi size lớn hơn 50 -> Spring tự CẮT về 50, không báo lỗi,
         // không throw exception — âm thầm bảo vệ, không làm vỡ request của client.
-        return resolver -> resolver.setMaxPageSize(50);
+        return resolver -> resolver.setMaxPageSize(1000);
     }
 
     @Override
