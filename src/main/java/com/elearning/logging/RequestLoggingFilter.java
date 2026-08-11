@@ -98,7 +98,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         // arguments, LogstashEncoder tự đưa mỗi key trong `fields` thành 1 field JSON
         // TOP-LEVEL (vd "status":200), khác với nhét cả object vào 1 field "message"
         // dạng chuỗi — quan trọng để sau này lọc/query log được (vd status=500).
-        log.info("access_log", StructuredArguments.entries(fields));
+//        log.info("access_log", StructuredArguments.entries(fields));
     }
 
     private void persistToDb(Map<String, Object> fields) {
