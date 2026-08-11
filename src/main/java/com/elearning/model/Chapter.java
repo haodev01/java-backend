@@ -37,6 +37,20 @@ public class Chapter {
         lesson.setChapter(this);
     }
 
+    // Xoá khỏi collection do Chapter quản lý — bắt buộc phải qua đường này
+    // (không phải gọi thẳng 1 repository.delete() nào đó) vì Lesson không có
+    // repository riêng (nguyên tắc aggregate root). orphanRemoval=true trên
+    // @OneToMany bên dưới tự sinh DELETE khi save() Chapter với lesson đã bị
+    // remove khỏi list.
+    public void removeLesson(Lesson lesson) {
+        lessons.remove(lesson);
+    }
+
+    public void update(String title, Integer order) {
+        if (title != null) this.title = title;
+        if (order != null) this.order = order;
+    }
+
     void setCourse(Course course) { this.course = course; }
 
     // @JsonIgnore: dùng được trong Java code (vd kiểm tra ownership ở

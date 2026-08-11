@@ -61,6 +61,15 @@ public class Course {
         chapter.setCourse(this);
     }
 
+    // Partial update: field null nghĩa là "không đổi", không phải "xoá giá
+    // trị cũ" — DTO ở tầng Service đã đảm bảo null = client không gửi field đó.
+    public void update(String title, String description, BigDecimal price, CourseStatus status) {
+        if (title != null) this.title = title;
+        if (description != null) this.description = description;
+        if (price != null) this.price = price;
+        if (status != null) this.status = status;
+    }
+
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getSlug() { return slug; }

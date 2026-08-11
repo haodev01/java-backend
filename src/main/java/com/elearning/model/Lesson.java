@@ -44,4 +44,10 @@ public class Lesson {
 
     public void attachContentUrl(String url) { this.contentUrl = url; }
     public String getContentUrl() { return contentUrl; }
+
+    public void update(String title, Integer order, String contentType) {
+        if (title != null) this.title = title;
+        if (order != null) this.order = order;
+        if (contentType != null) this.contentType = contentType;
+    }
 }

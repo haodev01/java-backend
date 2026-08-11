@@ -47,12 +47,72 @@ public class CourseController {
     public ResponseEntity<ApiResponse<Course>> detail(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success("OK", courseService.getCourse(id)));
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Course>> update(Authentication authentication,
+                                                       @PathVariable Long id, @RequestBody UpdateCourseRequest request) {
+        Course course = courseService.updateCourse(authentication.getName(), id, request);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật khoá học thành công", course));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> delete(Authentication authentication, @PathVariable Long id) {
+        courseService.deleteCourse(authentication.getName(), id);
+        return ResponseEntity.ok(ApiResponse.success("Xoá khoá học thành công", null));
+    }
+
     @PostMapping("/{courseId}/chapters")
     @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
     public ResponseEntity<ApiResponse<Course>> addChapter(Authentication authentication,
                                                           @PathVariable Long courseId, @RequestBody CreateChapterRequest request) {
         Course course = courseService.addChapter(authentication.getName(), courseId, request);
         return ResponseEntity.ok(ApiResponse.success("Thêm chương thành công", course));
+    }
+
+    @PutMapping("/{courseId}/chapters/{chapterId}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Chapter>> updateChapter(Authentication authentication,
+                                                               @PathVariable Long courseId, @PathVariable Long chapterId,
+                                                               @RequestBody UpdateChapterRequest request) {
+        Chapter chapter = courseService.updateChapter(authentication.getName(), courseId, chapterId, request);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật chương thành công", chapter));
+    }
+
+    @DeleteMapping("/{courseId}/chapters/{chapterId}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteChapter(Authentication authentication,
+                                                            @PathVariable Long courseId, @PathVariable Long chapterId) {
+        courseService.deleteChapter(authentication.getName(), courseId, chapterId);
+        return ResponseEntity.ok(ApiResponse.success("Xoá chương thành công", null));
+    }
+
+    @PostMapping("/{courseId}/chapters/{chapterId}/lessons")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Chapter>> addLesson(Authentication authentication,
+                                                           @PathVariable Long courseId, @PathVariable Long chapterId,
+                                                           @RequestBody CreateLessonRequest request) {
+        Chapter chapter = courseService.addLesson(authentication.getName(), courseId, chapterId, request);
+        return ResponseEntity.ok(ApiResponse.success("Thêm bài học thành công", chapter));
+    }
+
+    @PutMapping("/{courseId}/chapters/{chapterId}/lessons/{lessonId}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Chapter>> updateLesson(Authentication authentication,
+                                                              @PathVariable Long courseId, @PathVariable Long chapterId,
+                                                              @PathVariable Long lessonId, @RequestBody UpdateLessonRequest request) {
+        Chapter chapter = courseService.updateLesson(authentication.getName(), courseId, chapterId, lessonId, request);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật bài học thành công", chapter));
+    }
+
+    @DeleteMapping("/{courseId}/chapters/{chapterId}/lessons/{lessonId}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<ApiResponse<Chapter>> deleteLesson(Authentication authentication,
+                                                              @PathVariable Long courseId, @PathVariable Long chapterId,
+                                                              @PathVariable Long lessonId) {
+        Chapter chapter = courseService.deleteLesson(authentication.getName(), courseId, chapterId, lessonId);
+        return ResponseEntity.ok(ApiResponse.success("Xoá bài học thành công", chapter));
     }
 
     @PostMapping(value = "/{courseId}/thumbnail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

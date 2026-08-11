@@ -86,16 +86,7 @@ public class CourseService {
 
     @CacheEvict(value = "courseList", allEntries = true)
     public Chapter addLesson(String requesterEmail, Long courseId, Long chapterId, CreateLessonRequest request) {
-        Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy chương id=" + chapterId));
-
-        // Chapter này có thật sự thuộc đúng Course trong URL không? Chặn trường hợp
-        // ai đó truyền courseId và chapterId không khớp nhau.
-        if (!chapter.getCourse().getId().equals(courseId)) {
-            throw new NotFoundException("Chương id=" + chapterId + " không thuộc khoá học id=" + courseId);
-        }
-        ensureOwnerOrAdmin(requesterEmail, chapter.getCourse());
-
+        Chapter chapter = getOwnedChapter(requesterEmail, courseId, chapterId);
         chapter.addLesson(new Lesson(request.title(), request.order(), request.contentType()));
         chapterRepository.save(chapter); // cascade tự INSERT lesson mới
         return chapter;
@@ -112,23 +103,89 @@ public class CourseService {
 
     public Chapter uploadLessonVideo(String requesterEmail, Long courseId, Long chapterId,
                                      Long lessonId, MultipartFile file) {
-        Chapter chapter = chapterRepository.findById(chapterId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy chương id=" + chapterId));
-        if (!chapter.getCourse().getId().equals(courseId)) {
-            throw new NotFoundException("Chương id=" + chapterId + " không thuộc khoá học id=" + courseId);
-        }
-        ensureOwnerOrAdmin(requesterEmail, chapter.getCourse());
-
-        Lesson lesson = chapter.getLessons().stream()
-                .filter(l -> l.getId().equals(lessonId))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy bài học id=" + lessonId));
+        Chapter chapter = getOwnedChapter(requesterEmail, courseId, chapterId);
+        Lesson lesson = findLessonOrThrow(chapter, lessonId);
 
         validateFile(file, "video/", MAX_VIDEO_BYTES, "Video bài học phải là file video, tối đa 500MB");
 
         lesson.attachContentUrl(fileStorageService.store(file, "lessons"));
         chapterRepository.save(chapter); // cascade cập nhật đúng Lesson vừa sửa
         return chapter;
+    }
+
+    // ===== Update / Delete Course =====
+
+    @CacheEvict(value = "courseList", allEntries = true)
+    public Course updateCourse(String requesterEmail, Long courseId, UpdateCourseRequest request) {
+        Course course = getCourse(courseId);
+        ensureOwnerOrAdmin(requesterEmail, course);
+        course.update(request.title(), request.description(), request.price(), request.status());
+        return courseRepository.save(course);
+    }
+
+    @CacheEvict(value = "courseList", allEntries = true)
+    public void deleteCourse(String requesterEmail, Long courseId) {
+        Course course = getCourse(courseId);
+        ensureOwnerOrAdmin(requesterEmail, course);
+        // cascade ALL + orphanRemoval trên Course.chapters (và tương tự trên
+        // Chapter.lessons) tự xoá toàn bộ chapter/lesson con — không cần xoá
+        // tay từng cấp.
+        courseRepository.delete(course);
+    }
+
+    // ===== Update / Delete Chapter =====
+
+    public Chapter updateChapter(String requesterEmail, Long courseId, Long chapterId, UpdateChapterRequest request) {
+        Chapter chapter = getOwnedChapter(requesterEmail, courseId, chapterId);
+        chapter.update(request.title(), request.order());
+        return chapterRepository.save(chapter);
+    }
+
+    // Xoá chapter làm đổi chapterCount trong CourseSummary (courseList) —
+    // khác updateChapter/updateLesson/deleteLesson không đụng tới field nào
+    // mà courseList hiển thị nên không cần evict.
+    @CacheEvict(value = "courseList", allEntries = true)
+    public void deleteChapter(String requesterEmail, Long courseId, Long chapterId) {
+        Chapter chapter = getOwnedChapter(requesterEmail, courseId, chapterId);
+        chapterRepository.delete(chapter);
+    }
+
+    // ===== Update / Delete Lesson =====
+
+    public Chapter updateLesson(String requesterEmail, Long courseId, Long chapterId, Long lessonId,
+                                UpdateLessonRequest request) {
+        Chapter chapter = getOwnedChapter(requesterEmail, courseId, chapterId);
+        Lesson lesson = findLessonOrThrow(chapter, lessonId);
+        lesson.update(request.title(), request.order(), request.contentType());
+        chapterRepository.save(chapter);
+        return chapter;
+    }
+
+    public Chapter deleteLesson(String requesterEmail, Long courseId, Long chapterId, Long lessonId) {
+        Chapter chapter = getOwnedChapter(requesterEmail, courseId, chapterId);
+        Lesson lesson = findLessonOrThrow(chapter, lessonId);
+        chapter.removeLesson(lesson); // orphanRemoval tự DELETE khi save()
+        return chapterRepository.save(chapter);
+    }
+
+    // Tìm chapter theo id, xác nhận đúng thuộc courseId trong URL, và kiểm
+    // tra quyền sở hữu — dùng chung cho mọi thao tác cấp chapter/lesson
+    // (trước đây lặp lại y hệt ở addLesson/uploadLessonVideo).
+    private Chapter getOwnedChapter(String requesterEmail, Long courseId, Long chapterId) {
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy chương id=" + chapterId));
+        if (!chapter.getCourse().getId().equals(courseId)) {
+            throw new NotFoundException("Chương id=" + chapterId + " không thuộc khoá học id=" + courseId);
+        }
+        ensureOwnerOrAdmin(requesterEmail, chapter.getCourse());
+        return chapter;
+    }
+
+    private Lesson findLessonOrThrow(Chapter chapter, Long lessonId) {
+        return chapter.getLessons().stream()
+                .filter(l -> l.getId().equals(lessonId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy bài học id=" + lessonId));
     }
 
     // Từ Lesson 0012 (Bước 8) — kiểm tra ĐÚNG người sở hữu course cụ thể, không
