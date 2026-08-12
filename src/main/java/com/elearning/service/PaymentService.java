@@ -1,5 +1,6 @@
 package com.elearning.service;
 
+import com.elearning.dto.OrderPaidEvent;
 import com.elearning.exception.NotFoundException;
 import com.elearning.model.Order;
 import com.elearning.model.OrderStatus;
@@ -7,6 +8,7 @@ import com.elearning.model.Payment;
 import com.elearning.model.PaymentStatus;
 import com.elearning.repository.OrderRepository;
 import com.elearning.repository.PaymentRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,12 +21,18 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final VNPayService vnPayService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public PaymentService(PaymentRepository paymentRepository, OrderRepository orderRepository,
-                          VNPayService vnPayService) {
+    public PaymentService(
+            PaymentRepository paymentRepository,
+            OrderRepository orderRepository,
+            VNPayService vnPayService,
+            ApplicationEventPublisher eventPublisher
+    ) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.vnPayService = vnPayService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -86,6 +94,7 @@ public class PaymentService {
         if ("00".equals(responseCode)) {
             payment.markSuccess(params.get("vnp_TransactionNo"));
             payment.getOrder().markPaid(); // state machine đã viết ở Lesson 0018
+            eventPublisher.publishEvent(new OrderPaidEvent(payment.getOrder().getId())); // MỚI — CHỈ dòng này
         } else {
             payment.markFailed();
         }

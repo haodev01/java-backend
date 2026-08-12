@@ -1,6 +1,7 @@
 package com.elearning.model;
 
 import com.elearning.model.Chapter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -50,4 +51,7 @@ public class Lesson {
         if (order != null) this.order = order;
         if (contentType != null) this.contentType = contentType;
     }
+
+    @JsonIgnore
+    public Chapter getChapter() { return chapter; }
 }
