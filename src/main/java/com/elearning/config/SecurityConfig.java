@@ -60,7 +60,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/forgot-password",   // mới — chưa đăng nhập được nên PHẢI public
-                                "/api/v1/auth/reset-password"      // mới — lý do tương tự
+                                "/api/v1/auth/reset-password",
+                                "/api/v1/payments/vnpay-ipn", "/api/v1/payments/vnpay-return"  // mới — lý do tương tự
                         ).permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET,
                                 "/api/v1/courses/**", "/uploads/**").permitAll()
